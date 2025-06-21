@@ -1,0 +1,432 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+    
+    <body layout:fragment="body" class="bg-primary">
+        <div class="container mt-4 border border-primary rounded p-4 bg-light">
+            
+            <form method="post" th:object="${usuarioDireccion}" th:action="@{/usuario/Formulario}" class="mt-3" id="Formulario" enctype="multipart/form-data">
+                
+                <input type="hidden" th:field="*{Usuario.IdUsuario}">
+                <input type="hidden" th:field="*{Direccion.IdDireccion}">
+                
+                <div class="row">
+                    <h2 class="bg-success text-white p-2 rounded">Ingresa los datos que se te solicitan</h2>
+                </div>
+                
+                <div th:if="*{(Usuario.IdUsuario == 0 && Direccion.IdDireccion == 0) || (Usuario.IdUsuario > 0 && Direccion.IdDireccion == -1)}">
+                    <div class="row mt-3">
+                        <div class="col-md-3 me-3">
+                            <button type="button" class="btn btn-secondary mb-2" onclick="document.getElementById('inputImagen').click()">Cargar Imagen</button>
+                            <div class="border border-dark d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <img id="preview" alt="Foto" class="profile-img" style="max-height: 100%; max-width: 100%; object-fit: cover;"
+                                     onerror="this.src='https://via.placeholder.com/140';" th:src="${usuarioDireccion.Usuario.Fotografia == null} ? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/1200px-User_icon_2.svg.png' : 'data:image/png;base64,' + ${usuarioDireccion.Usuario.Fotografia}">
+                            </div>
+                            <input type="file" name="fotoPerfil" id="inputImagen" accept="image/png, image/jpeg" style="display: none;" onchange="mostrarPreview(this)">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <label for="exampleFormControlInput1" class="form-label">Nombre (S)</label>
+                                <input type="text" class="form-control" id="Nombre" name="Nombre" placeholder="Juanito" th:field="*{Usuario.NombreUsuario}" onpaste="return false">
+                                <span class="text-danger" th:if="${#fields.hasErrors('Usuario.NombreUsuario')}" th:errors="*{Usuario.NombreUsuario}"></span>
+                            </div>
+                            <div class="row">
+                                <label for="exampleFormControlInput1" class="form-label mt-4">Apellido Paterno</label>
+                                <input type="text" class="form-control" id="ApellidoPaterno" name="ApellidoPaterno" placeholder="Lopez" th:field="*{Usuario.ApellidoPaterno}">
+                                <span class="text-danger" th:if="${#fields.hasErrors('Usuario.ApellidoPaterno')}" th:errors="*{Usuario.ApellidoPaterno}"></span>
+                            </div>
+                            <div class="row">
+                                <label for="exampleFormControlInput1" class="form-label mt-4">Apellido Materno</label>
+                                <input type="text" class="form-control" id="ApellidoMaterno" name="ApellidoMaterno" placeholder="Sabala" th:field="*{Usuario.ApellidoMaterno}">
+                                <span class="text-danger" th:if="${#fields.hasErrors('Usuario.ApellidoMaterno')}" th:errors="*{Usuario.ApellidoMaterno}"></span>
+                            </div>
+                            <div class="row">
+                                <label for="exampleFormControlInput1" class="form-label mt-4">CURP</label>
+                                <input type="text" class="form-control" id="CURP" name="CURP" placeholder="18 DIGITOS" th:field="*{Usuario.CURP}">
+                                <span class="text-danger" th:if="${#fields.hasErrors('Usuario.CURP')}" th:errors="*{Usuario.CURP}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-mb-10">
+                            <div class="form-gruop">
+                                <label for="exampleFormControlInput1" class="form-label mt-4">Sexo</label>
+                                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                <label class="form-label mt-2">Fecha de nacimiento</label>
+                                <div class="input-group">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="sexo" id="Hombre" value="H" th:field="*{Usuario.Sexo}">
+                                        <label class="form-check-label" for="radioDisabled">Hombre</label>
+                                        <span class="text-danger" th:if="${#fields.hasErrors('Usuario.Sexo')}" th:errors="*{Usuario.Sexo}"></span>
+                                    </div>
+                                    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="sexo" id="Mujer" value="M" th:field="*{Usuario.Sexo}">
+                                        <label class="form-check-label" for="radioCheckedDisabled">Mujer</label>
+                                        <span class="text-danger" th:if="${#fields.hasErrors('Usuario.Sexo')}" th:errors="*{Usuario.Sexo}"></span>
+                                    </div>  
+                                    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                    <div class="mb-2">
+                                        <input type="date" class="form-control" name="FechaNacimiento" id="FechaNacimiento" th:field="*{Usuario.FechaNacimiento}">
+                                        <span class="text-danger" th:if="${#fields.hasErrors('Usuario.FechaNacimiento')}" th:errors="*{Usuario.FechaNacimiento}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-mb-10">
+                            <label for="exampleFormControlInput1" class="form-label">Correo Electronico</label>
+                            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            <label class="form-label mt-2">Contraseña</label>
+                        </div>
+                        <div class="input-group">
+                            <div class="form-floating mb-3">
+                              <input type="email" class="form-control" id="Correo" th:field="*{Usuario.Email}">
+                              <label for="floatingInput">Correo electronico: ejemplo@email.com</label>
+                              <span class="text-danger" th:if="${#fields.hasErrors('Usuario.Email')}" th:errors="*{Usuario.Email}"></span>
+                            </div>
+                            <div class="form-floating">
+                              <input type="password" class="form-control" id="Password" th:field="*{Usuario.Password}">
+                              <label for="floatingPassword">Contraseña</label>
+                              <span class="text-danger" th:if="${#fields.hasErrors('Usuario.Password')}" th:errors="*{Usuario.Password}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-mb-10">
+                            <label for="exampleFormControlInput1" class="form-label">Medios de contacto</label>
+                        </div>
+                        <div class="input-group">
+                            <div class="form-floating mb-3">
+                                <input type="number" minlength="10" maxlength="10" class="form-control" id="NumeroTelefono" th:field="*{Usuario.NumeroTelefono}">
+                                <label for="floatingInput">Tel:</label>
+                                <span class="text-danger" th:if="${#fields.hasErrors('Usuario.NumeroTelefono')}" th:errors="*{Usuario.NumeroTelefono}"></span>
+                            </div>
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="Celular" th:field="*{Usuario.Celular}">
+                                <label for="floatingInput">Cel:</label>
+                                <span class="text-danger" th:if="${#fields.hasErrors('Usuario.Celular')}" th:errors="*{Usuario.Celular}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-group">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="UserName" th:field="*{Usuario.UserName}">
+                                <label for="floatingInput">Nombre de usuario:</label>
+                                <span class="text-danger" th:if="${#fields.hasErrors('Usuario.UserName')}" th:errors="*{Usuario.UserName}"></span>
+                            </div>
+                            <div class="mb-2">
+                                <select class="form-select" aria-label="Default select example0" name="IdRol" id="IdRol" th:field="*{Usuario.Rol.IdRol}">
+                                    <option value="0" disabled selected>Selecciona el tipo de rol</option>
+                                    <option th:each="roles : ${roles}" th:value="${roles.IdRol}" th:text="${roles.Rol}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DIVISON DEL FORMULARIO -->
+                
+                <div th:if="*{(Usuario.IdUsuario == 0 && Direccion.IdDireccion == 0) || (Usuario.IdUsuario > 0 && Direccion.IdDireccion >=0)}">
+                     <div class="container">
+                    <div class="row">
+                        <div class="col-xs-12 col-mb-10">
+                            <label for="exampleFormControlInput1" class="form-label">Direccion</label>
+                            <div class="input-group">
+                                <div>
+                                    <input type="text" class="form-control" name="calle" id="Calle" placeholder="Av. Insurgentes" th:field="*{Direccion.Calle}">
+                                    <span class="text-danger" th:if="${#fields.hasErrors('Direccion.Calle')}" th:errors="*{Direccion.Calle}"></span>
+                                </div>
+                                <div>
+                                    <input type="number" min="0" class="form-control" name="calle" id="NumInterior" placeholder="Num. Interior" th:field="*{Direccion.NumeroInterior}">
+                                </div>
+                                <div>
+                                    <input type="number" min="0" class="form-control" name="calle" id="NumExterior" placeholder="Num. Exterior" th:field="*{Direccion.NumeroExterior}">
+                                </div>
+                                <div>
+                                    <input type="text" name="CodigoPostal" id="DDLCodigoPostal" placeholder="Codigo Postal">
+                                </div>
+                                <div class="mb-2">
+                                <select class="form-select" aria-label="Default select example" id="DDLPais">
+                                    <option value="0" disable selected>Selecciona un Pais</option>
+                                    <option th:each="paises : ${paises}" th:value="${paises.IdPais}" th:text="${paises.Nombre}"></option>
+                                </select>
+                            </div>
+                                <div class="mb-2">
+                                <select class="form-select" aria-label="Default select example" id="DDLEstado">
+                                    <option value="0" disable selected>Selecciona un Estado</option>
+                                </select>
+                            </div>
+                                <div class="mb-2">
+                                <select class="form-select" aria-label="Default select example" id="DDLMunicipio">
+                                    <option value="0" disable selected>Selecciona un Municipio</option>
+                                </select> 
+                            </div>
+                                <div class="mb-2">
+                                <select class="form-select" aria-label="Default select example" id="DDLColonia" th:field="*{Direccion.Colonia.IdColonia}">
+                                    <option value="0" disable selected>Selecciona un colonia</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+                </div>
+            </div>       
+                <div class="row mt-3">
+                    <div class="d-grid gap-2 col-6 mx-auto">
+                        <button type="submit" class="btn btn-success" th:text="${usuarioDireccion.Usuario.IdUsuario == 0} ? 'INGRESAR NUEVA USUARIO' : 'GUARDAR CAMBIOS'"></button>
+                    </div>
+                </div> 
+            </form>            
+        </div>
+                
+         <script>
+            const input = document.getElementById('inputImagen');
+            const preview = document.getElementById('preview');
+
+            input.addEventListener('change', function (event) {
+                const archivo = event.target.files[0];
+                if (archivo) {
+                    const lector = new FileReader();
+                    lector.onload = function (e) {
+                        preview.src = e.target.result;
+                    };
+                    lector.readAsDataURL(archivo);
+                }
+            });
+             
+            $(document).ready(function (){
+
+                $("#DDLPais").change(function(){
+                    let id = $("#DDLPais").val();
+                    $.ajax({
+                        type: 'GET',
+                        url: "/usuario/EstadosByPais/" + id,
+                        datatype: "json",
+                        success: function (response) {
+                            $("#DDLEstado").empty();
+                            $("#DDLEstado").append("<option value=0 selected>Selecciona un estado</option>");
+                            $.each(response.objects, function(i, estado){
+                                $("#DDLEstado").append("<option value=" + estado.idEstado + ">" + estado.nombre + "</option>");
+                            });
+                        }, error: function () {
+                            alert("Ocurrio un error, intentalo más tarde");
+                        }
+                    });
+                });
+            });
+            
+            $(document).ready(function (){
+                $("#DDLEstado").change(function(){
+                    let id = $("#DDLEstado").val();
+                    $.ajax({
+                        type: 'GET',
+                        url: "/usuario/MunicipiosByEstado/" + id,
+                        datatype: "json",
+                        success: function (response) {
+                            $("#DDLMunicipio").empty();
+                            $("#DDLMunicipio").append("<option value=0 selected>Selecciona un Municipio</option>");
+                            $.each(response.objects, function(i, municipio){
+                                $("#DDLMunicipio").append("<option value=" + municipio.idMunicipio + ">" + municipio.nombre + "</option>");
+                            });
+                        }, error: function () {
+                            alert("Ocurrio un error, intentalo más tarde");
+                        }
+                    });
+                });
+            });
+            
+            $(document).ready(function (){
+                $("#DDLMunicipio").change(function(){
+                    let id = $("#DDLMunicipio").val();
+                    $.ajax({
+                        type: 'GET',
+                        url: "/usuario/ColoniasByMunicipio/" + id,
+                        datatype: "json",
+                        success: function (response) {
+                            $("#DDLColonia").empty();
+                            $("#DDLColonia").append("<option value=0 selected>Selecciona una Colonia</option>");
+                            $.each(response.objects, function(i, colonia){
+                                $("#DDLColonia").append("<option value='" + colonia.idColonia + "' data-cp='" + colonia.codigoPostal + "'>" + colonia.nombre + "</option>");
+                            });
+                        }, error: function () {
+                            alert("Ocurrio un error, intentalo más tarde");
+                        }
+                    });
+                });
+                
+                $("#DDLColonia").change(function(){
+                   let seleccion = $(this).find("option:selected"); 
+                   let CP = seleccion.data("cp");
+                   
+                   $("#DDLCodigoPostal").val(CP);
+                });
+            });
+            
+            $(document).ready(function () {
+
+                const soloLetras = ['#Nombre', '#ApellidoPaterno', '#ApellidoMaterno'];
+
+                soloLetras.forEach(function (selector) {
+                    $(selector).on('input', function () {
+                        const valor = $(this).val();
+                        const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+                        if (regex.test(valor.trim()) && valor.trim().length > 2) {
+                            mostrarValido($(this));
+                        } else {
+                            mostrarInvalido($(this), "Debe tener al menos 3 letras y solo caracteres válidos.");
+                        }
+                    });
+
+                    $(selector).on('copy paste', function (e) {
+                        e.preventDefault();
+                    });
+                });
+
+                $('#CURP').on('input', function () {
+                    const valor = $(this).val();
+                    const regex = /^[A-Z]{4}\d{6}[A-Z]{6}\d{2}$/;
+
+                    if (regex.test(valor.trim())) {
+                        mostrarValido($(this));
+                    } else {
+                        mostrarInvalido($(this), "CURP no válido. Debe tener 18 caracteres alfanuméricos.");
+                    }
+                });
+                
+                $('input[name="sexo"]').on('change', function () {
+                    if ($('input[name="sexo"]:checked').length > 0) {
+                        mostrarValido($('input[name="sexo"]').first());
+                    } else {
+                        mostrarInvalido($('input[name="sexo"]').first(), "Selecciona una opción.");
+                    }
+                });
+                
+                $('#FechaNacimiento').on('change', function () {
+                    const valor = $(this).val();
+                    const hoy = new Date().toISOString().split('T')[0];
+
+                    if (valor && valor <= hoy) {
+                        mostrarValido($(this));
+                    } else {
+                        mostrarInvalido($(this), "La fecha es invalida");
+                    }
+                });
+                
+                $('#NombreCalle').on('input', function () {
+                    const valor = $(this).val();
+                    const puntos = (valor.match(/:/g) || []).length;
+                    const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s:]+$/;
+
+                    if (regex.test(valor.trim()) && puntos <= 2 && valor.trim().length > 2) {
+                        mostrarValido($(this));
+                    } else {
+                        mostrarInvalido($(this), "El nombre no es valido");
+                    }
+                });
+
+                $('#Correo').on('input', function () {
+                    const valor = $(this).val();
+                    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                    if (regex.test(valor.trim())) {
+                        mostrarValido($(this));
+                    } else {
+                        mostrarInvalido($(this), "Correo electrónico no válido.");
+                    }
+                });
+
+                $('#password').on('input', function () {
+                    const valor = $(this).val();
+                    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$/;
+
+                    if (regex.test(valor.trim()) && valor.trim().length >= 8) {
+                        mostrarValido($(this));
+                    } else {
+                        mostrarInvalido($(this), "La contraseña debe tener al menos 8 caracteres.");
+                    }
+                });
+
+                $('#NumeroTelefono').on('input', function () {
+                    const valor = $(this).val();
+
+                    if (/^\d{10}$/.test(valor)) {
+                        mostrarValido($(this));
+                    } else {
+                        mostrarInvalido($(this), "El número debe tener 10 dígitos.");
+                    }
+                });
+                
+                $('#Celular').on('input', function () {
+                    const valor = $(this).val();
+
+                    if (/^\d{10}$/.test(valor)) {
+                        mostrarValido($(this));
+                    } else {
+                        mostrarInvalido($(this), "El número debe tener 10 dígitos.");
+                    }
+                });
+                
+                $('#DDLCodigoPostal').on('input', function () {
+                    const valor = $(this).val();
+
+                    if (/^[0-9,$]*$/.test(valor)) {
+                        mostrarValido($(this));
+                    } else {
+                        mostrarInvalido($(this), "Solo se admiten números");
+                    }
+                });
+
+                const selectsObligatorios = ['#DDLColonia', '#DDLPais', '#DDLEstado', '#DDLMunicipio', '#IdRol'];
+
+                selectsObligatorios.forEach(function (selector) {
+                    $(selector).on('change', function () {
+                        if ($(this).val() !== "0") {
+                            mostrarValido($(this));
+                        } else {
+                            mostrarInvalido($(this), "Selecciona una opción válida.");
+                        }
+                    });
+                });
+
+                $('#Formulario').on('submit', function (e) {
+                    let valido = true;
+
+                    $('input, select').each(function () {
+                        if ($(this).hasClass('is-invalid') || ($(this).is('select') && $(this).val() === "0")) {
+                            valido = false;
+                            mostrarInvalido($(this), "Este campo es obligatorio o no es válido.");
+                        }
+                    });
+
+                    if (!valido) {
+                        e.preventDefault();
+                    }
+                    
+                    if ($('input[name="sexo"]:checked').length === 0) {
+                        valido = false;
+                        mostrarInvalido($('input[name="sexo"]').first(), "Selecciona una opción.");
+                    }
+                });
+
+                function mostrarValido(input) {
+                    input.removeClass('is-invalid').addClass('is-valid');
+                    input.next('.invalid-feedback').remove();
+                }
+
+                function mostrarInvalido(input, mensaje) {
+                    input.removeClass('is-valid').addClass('is-invalid');
+
+                    if (input.next('.invalid-feedback').length === 0) {
+                        input.after('<div class="invalid-feedback d-block">' + mensaje + '</div>');
+                    } else {
+                        input.next('.invalid-feedback').text(mensaje);
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

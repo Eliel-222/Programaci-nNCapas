@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+    
+    <body layout:fragment="body">
+        <div class="container mt-4">
+            <div class="bg-secondary-subtle">
+                <br>
+                <br>
+                <div class="d-grid gap-2 col-6 mx-auto mt-3">
+                    <button class="btn btn-dark fw-bold" id="seleccionar" onclick="mostrarBotones()">
+                        SELECCIONAR ARCHIVO
+                    </button>
+                </div>
+
+                <div id="botones" style="display: none;" onclick="cargarArchivo()">
+                    <div class="d-grid gap-2 col-6 mx-auto mt-3">
+                        <button class="btn btn-success fw-bold" id="excel">
+                        CARGAR ARCHIVO EXCEL
+                    </button>
+                    </div>
+                    <div class="d-grid gap-2 col-6 mx-auto mt-3">
+                        <button class="btn btn-primary fw-bold" id="txt">
+                            CARGAR ARCHIVO DE TEXTO
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="display: none;" id="cargarSeleccion">
+                    <form method="post" action="/usuario/cargamasiva" enctype="multipart/form-data">
+                        <div class="d-grid gap-2 col-6 mx-auto mt-3">
+                            <input type="file" class="form-control" name="archivo" id="archivo" aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".xlsx,.txt">
+                            <button class="btn btn-outline-secondary" type="submit" id="enviarArchivo">ENVIAR ARCHIVO</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div style="display: none;" id="btncancelar">
+                    <div class="d-grid gap-2 col-2 mx-auto mt-3">
+                        <button class="btn btn-danger fw-bold" id="btncancelar" onclick="cancelar()">
+                            CANCELAR
+                        </button>
+                    </div>
+                </div>
+                <br>
+                <br>
+            </div>
+        </div>
+        
+        <script>
+            
+            function mostrarBotones(){
+                document.getElementById("seleccionar").style.display = "none";
+                document.getElementById("botones").style.display = "block";
+                document.getElementById("btncancelar").style.display = "block";
+            }
+            
+            function cancelar(){
+                document.getElementById("seleccionar").style.display = "block";
+                document.getElementById("botones").style.display = "none";
+                document.getElementById("btncancelar").style.display = "none";
+                document.getElementById("cargarSeleccion").style.display = "none";
+            }
+            
+            function cargarArchivo(){
+                document.getElementById("cargarSeleccion").style.display = "block";
+                document.getElementById("btncancelar").style.display = "block";
+            }
+            
+            let tipoArchivo = "";
+            
+            document.getElementById("excel").addEventListener("click", function(){
+                tipoArchivo = "xlsx";
+                
+                document.getElementById("cargarSeleccion").style.display = "block";
+                document.getElementById("archivo").setAttribute("accept", ".xlsx"); 
+            });
+            
+            document.getElementById("txt").addEventListener("click", function(){
+                tipoArchivo = "txt";
+                
+                document.getElementById("cargarSeleccion").style.display = "block";
+                document.getElementById("archivo").setAttribute("accept", ".txt"); 
+            });
+            
+            document.getElementById("archivo").addEventListener("change", function () {
+
+                if (this.files.length > 0) {
+
+                    var fileName = this.files[0].name;
+                    var fileExtension = fileName.split('.').pop().toLowerCase();
+
+                    if (fileExtension !== tipoArchivo) {
+                        alert("Por favor, seleccione un archivo " + tipoArchivo.toUpperCase() + " válido.");
+                        this.value = "";
+                    }
+                }
+            });
+            
+        </script>
+    </body>
+</html>

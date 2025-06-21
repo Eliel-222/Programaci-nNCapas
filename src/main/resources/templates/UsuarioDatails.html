@@ -1,0 +1,106 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+    
+    <body layout:fragment="body">
+        <div class="container">
+            <div class="row mt-5">
+                <div class="p-2 text-bg-dark d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-warning">
+                        <a th:href="@{/usuario/formeditable?IdUsuario=}+${usuarioDireccion.Usuario.IdUsuario}+'&IdDireccion=-1'">Editar Usuario     <i class="bi bi-pencil-square"></i></a>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+
+                <div class="col-md-3 border border-dark">
+                    <img th:src="'data:image/png;base64,' + ${usuarioDireccion.Usuario.Fotografia}" alt="Imagen de perfil" style="max-width: 100%">
+                </div>
+                <div class="col-md-1"></div>
+                
+                <div class="col-md-8">
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <label>Identificardor</label>
+                            <input type="text" class="form-control" th:value="${usuarioDireccion.Usuario.IdUsuario}" disabled>
+                        </div>
+                        <div class="col-md-5">
+                            <label>Nombre Completo</label>
+                            <input type="text" class="form-control" th:value="|${usuarioDireccion.Usuario.NombreUsuario} ${usuarioDireccion.Usuario.ApellidoPaterno} ${usuarioDireccion.Usuario.ApellidoMaterno}|" disabled>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <label>Nombre de Usuario</label>
+                            <input type="text" class="form-control" th:value="${usuarioDireccion.Usuario.UserName}" disabled> 
+                        </div>
+                        <div class="col-md-4">
+                            <label>Correo</label>
+                            <input type="text" class="form-control" th:value="${usuarioDireccion.Usuario.Email}" disabled>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <label>Fecha de Nacimiento</label>
+                            <input type="date" class="form-control" th:value="${usuarioDireccion.Usuario.FechaNacimiento}" disabled>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <label>Telefono Fijo</label>
+                            <input type="text" class="form-control" th:value="${usuarioDireccion.Usuario.NumeroTelefono}" disabled>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Numero Celular</label>
+                            <input type="text" class="form-control" th:value="${usuarioDireccion.Usuario.Celular}" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-5">
+                <div class="col-12">
+                    <table class="table table-striped table-hover container text-center table-responsive">
+                        <thead class="table-dark align-middle">
+                            <tr>
+                                <th class="col-3">CALLE</th>
+                                <th class="col-1">NUMERO INTERIOR</th>
+                                <th class="col-1">NUMERO EXTERIOR</th>
+                                <th class="col-2">CODIGO POSTAL</th>
+                                <th class="col-5">LOCALIZACIÓN</th>
+                                <th class="col-5">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-middle">
+                            <tr th:each="direccion : ${usuarioDireccion.Direcciones}">
+                                <td th:text="${direccion.Calle}"></td>
+                                <td th:text="${direccion.NumeroInterior}"></td>
+                                <td th:text="${direccion.NumeroExterior}"></td>
+                                <td th:text="${direccion.Colonia.CodigoPostal}"></td>
+                                <td th:text="|${direccion.Colonia.Nombre}, ${direccion.Colonia.Municipio.Nombre}, ${direccion.Colonia.Municipio.Estado.Nombre}, ${direccion.Colonia.Municipio.Estado.Pais.Nombre}|"></td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-danger">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                        <button class="btn btn-warning">
+                                            <a th:href="@{/usuario/formeditable?IdUsuario=}+${usuarioDireccion.Usuario.IdUsuario}+'&IdDireccion='+${direccion.IdDireccion}"><i class="bi bi-pencil-square"></i></a>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="button" class="btn btn-success">
+                        <a>Nueva Direccion      <i class="bi bi-plus-square"></i></a>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
