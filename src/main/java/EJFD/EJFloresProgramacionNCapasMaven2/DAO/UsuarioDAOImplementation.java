@@ -416,7 +416,7 @@ public class UsuarioDAOImplementation implements IUsuarioDAO{
         return result;
     }
 
-    @Override
+        @Override
     public Result InsercionMasiva(List<UsuarioDireccion> usuariosDireccion) {
         
         Result result = new Result();
@@ -430,7 +430,6 @@ public class UsuarioDAOImplementation implements IUsuarioDAO{
             result.errorMessage = ex.getLocalizedMessage();
             result.ex = ex;
         }
-        
         return result;
     }
 }

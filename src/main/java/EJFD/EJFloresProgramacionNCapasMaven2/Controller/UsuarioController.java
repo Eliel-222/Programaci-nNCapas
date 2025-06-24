@@ -406,9 +406,9 @@ public class UsuarioController {
             List<UsuarioDireccion> usuariosDireccion = new ArrayList<>();
             
             if(tipoarchivo == "txt"){
-                usuariosDireccion = LecturaArchivoTXT((MultipartFile) archivo);
+                usuariosDireccion = LecturaArchivoTXT((MultipartFile) archivo); //Se debe de corregis ese casteo
             }
-            if(tipoarchivo == "xlsx"){
+            if(tipoarchivo.equals("xlsx")){
                 usuariosDireccion = LecturaArchivoExcel(archivo);
             }
             

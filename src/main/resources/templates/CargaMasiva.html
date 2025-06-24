@@ -48,7 +48,7 @@
             </div>
             
             <div th:if="${archivoCorrecto == true}" id="procesardocumento">
-                <form method="post" th:action="@{/usuario/cargamasiva/procesar}" enctype="multipart/form-data">
+                <form th:action="@{/usuario/cargamasiva/procesar}" enctype="multipart/form-data">
                     <div class="d-grid gap-2 col-4 mx-auto mt-3">
                         <button type="submit" class="btn btn-warning fw-bold" id="procesar documento">
                             PROCESAR DOCUMENTO
@@ -57,9 +57,6 @@
                 </form>
             </div>
             <br>
-            <div th:if="${archivoCorrecto == false}">
-                <p th:text="${listaErrores}"></p>
-            </div>
         </div>
         
         <script>

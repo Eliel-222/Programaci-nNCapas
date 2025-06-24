@@ -16,6 +16,6 @@ public interface IUsuarioDAO { //Esta interfaz es la encargada de tener todas aq
     
     Result BusquedaDinamicaSP(Usuario usuario);
     
-    Result InsercionMasiva(List<UsuarioDireccion> usuariosDireccion);
+    Result InsercionMasiva(List<UsuarioDireccion> usuariosDireccion);//Esta es la lista de usuarios
     
 }
