@@ -137,7 +137,6 @@
                             <div class="input-group">
                                 <div>
                                     <input type="text" class="form-control" name="calle" id="Calle" placeholder="Av. Insurgentes" th:field="*{Direccion.Calle}">
-                                    <span class="text-danger" th:if="${#fields.hasErrors('Direccion.Calle')}" th:errors="*{Direccion.Calle}"></span>
                                 </div>
                                 <div>
                                     <input type="number" min="0" class="form-control" name="calle" id="NumInterior" placeholder="Num. Interior" th:field="*{Direccion.NumeroInterior}">
@@ -146,27 +145,27 @@
                                     <input type="number" min="0" class="form-control" name="calle" id="NumExterior" placeholder="Num. Exterior" th:field="*{Direccion.NumeroExterior}">
                                 </div>
                                 <div>
-                                    <input type="text" name="CodigoPostal" id="DDLCodigoPostal" placeholder="Codigo Postal">
+                                    <input type="text" name="CodigoPostal" id="CodigoPostal" placeholder="Codigo Postal" th:field="*{Direccion.Colonia.CodigoPostal}">
                                 </div>
                                 <div class="mb-2">
-                                <select class="form-select" aria-label="Default select example" id="DDLPais">
+                                <select class="form-select" aria-label="Default select example" id="DDLPais" th:field="*{Direccion.Colonia.Municipio.Estado.Pais.IdPais}">
                                     <option value="0" disable selected>Selecciona un Pais</option>
                                     <option th:each="paises : ${paises}" th:value="${paises.IdPais}" th:text="${paises.Nombre}"></option>
                                 </select>
                             </div>
                                 <div class="mb-2">
-                                <select class="form-select" aria-label="Default select example" id="DDLEstado">
-                                    <option value="0" disable selected>Selecciona un Estado</option>
+                                <select class="form-select" aria-label="Default select example" id="DDLEstado" th:field="*{Direccion.Colonia.Municipio.Estado.IdEstado}">
+                                    <option th:each="estados : ${estados}" value="0" disable selected th:value="${estados.IdEstado}" th:text="${estados.Nombre}">Selecciona un Estado</option>
                                 </select>
                             </div>
                                 <div class="mb-2">
-                                <select class="form-select" aria-label="Default select example" id="DDLMunicipio">
-                                    <option value="0" disable selected>Selecciona un Municipio</option>
+                                <select class="form-select" aria-label="Default select example" id="DDLMunicipio" th:field="*{Direccion.Colonia.Municipio.IdMunicipio}">
+                                    <option th:each="municipios : ${municipios}" value="0" disable selected th:value="${municipios.IdMunicipio}" th:text="${municipios.Nombre}">Selecciona un Municipio</option>
                                 </select> 
                             </div>
                                 <div class="mb-2">
                                 <select class="form-select" aria-label="Default select example" id="DDLColonia" th:field="*{Direccion.Colonia.IdColonia}">
-                                    <option value="0" disable selected>Selecciona un colonia</option>
+                                    <option th:each="colonia : ${colonia}" value="0" disable selected th:value="${colonia.IdColonia}" th:text="${colonia.Nombre}">Selecciona un colonia</option>
                                 </select>
                             </div>
                         </div>
@@ -370,7 +369,7 @@
                     }
                 });
                 
-                $('#DDLCodigoPostal').on('input', function () {
+                $('#CodigoPostal').on('input', function () {
                     const valor = $(this).val();
 
                     if (/^[0-9,$]*$/.test(valor)) {

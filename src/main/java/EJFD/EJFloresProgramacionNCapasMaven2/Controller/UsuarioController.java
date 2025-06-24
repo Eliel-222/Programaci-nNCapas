@@ -7,19 +7,23 @@ import EJFD.EJFloresProgramacionNCapasMaven2.DAO.MunicipioDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.PaisDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.RolDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.UsuarioDAOImplementation;
+import EJFD.EJFloresProgramacionNCapasMaven2.ML.Colonia;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.Direccion;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.Result;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.ResultValidarDatos;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.Rol;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.Usuario;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.UsuarioDireccion;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import static java.lang.Long.parseLong;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -154,10 +158,18 @@ public class UsuarioController {
     }
     
     @PostMapping("cargamasiva")
-    public String CargaMasiva(@RequestParam MultipartFile archivo, Model model) throws Exception{
-         if (archivo != null && !archivo.isEmpty()) {
+    public String CargaMasiva(@RequestParam MultipartFile archivo, Model model, HttpSession session) throws Exception{
+         
+        if (archivo != null && !archivo.isEmpty()) {
 
             String fileExtention = archivo.getOriginalFilename().split("\\.")[1];
+            
+            //Construcción del archivo 
+            String root = System.getProperty("user.dir"); 
+            String path = "src/main/resources/files";
+            String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String absolutePath = root + "/" + path + "/" + fecha + archivo.getOriginalFilename();
+            archivo.transferTo(new File(absolutePath));
 
             List<UsuarioDireccion> usuariosDireccion = new ArrayList<>();
 
@@ -165,11 +177,25 @@ public class UsuarioController {
                 usuariosDireccion = LecturaArchivoTXT(archivo);
                 
             } else { //"xlsx"
-                usuariosDireccion = LecturaArchivoExcel(archivo);
+                 usuariosDireccion = LecturaArchivoExcel(new File(absolutePath));
             }
-            validarDatos(usuariosDireccion);
+            
+            List<ResultValidarDatos> listaErrores = validarDatos(usuariosDireccion);
+            
+            try{
+                if (listaErrores.isEmpty()) {
+                    session.setAttribute("path", absolutePath);
+                    model.addAttribute("listaErrores", listaErrores);
+                    model.addAttribute("archivoCorrecto", true);
+                } else {
+                    model.addAttribute("listaErrores", listaErrores);
+                    model.addAttribute("archivoCorrecto", false);
+                }
+            }catch(Exception ex){
+                System.out.println("Error: "+ex);
+            }
         }
-        return "";
+        return "CargaMasiva";
     }
     
     
@@ -205,12 +231,13 @@ public class UsuarioController {
                 usuarioDireccion.Usuario.setUserName(datos[10]);
                 usuarioDireccion.Usuario.Rol = new Rol();
                 usuarioDireccion.Usuario.Rol.setIdRol(Integer.parseInt(datos[11]));
-                usuarioDireccion.Usuario.setEstado(Integer.parseInt(datos[12]));
-                //usuarioDireccion.Direccion.setIdDireccion(Integer.parseInt(datos[13]));
-                //usuarioDireccion.Direccion.setCalle(datos[14]);
-                //usuarioDireccion.Direccion.setNumeroInterior(datos[15]);
-                //usuarioDireccion.Direccion.setNumeroExterior(datos[16]);
-                //usuarioDireccion.Direccion.Colonia.setIdColonia(Integer.parseInt(datos[17]));
+                usuarioDireccion.Usuario.setFotografia(datos[12]);
+                usuarioDireccion.Usuario.setEstado(Integer.parseInt(datos[13]));
+                usuarioDireccion.Direccion.setIdDireccion(Integer.parseInt(datos[14]));
+                usuarioDireccion.Direccion.setCalle(datos[15]);
+                usuarioDireccion.Direccion.setNumeroInterior(datos[16]);
+                usuarioDireccion.Direccion.setNumeroExterior(datos[17]);
+                usuarioDireccion.Direccion.Colonia.setIdColonia(Integer.parseInt(datos[18]));
                 
                 usuariosDireccion.add(usuarioDireccion);
 
@@ -221,23 +248,28 @@ public class UsuarioController {
         return usuariosDireccion;
     }
     
-    public List<UsuarioDireccion> LecturaArchivoExcel(MultipartFile archivo){
+    public List<UsuarioDireccion> LecturaArchivoExcel(File archivo){
         
         List<UsuarioDireccion> usuariosDireccion = new ArrayList<>();
         
-        try(XSSFWorkbook workbook = new XSSFWorkbook(archivo.getInputStream())){
+        try{
+            XSSFWorkbook workbook = new XSSFWorkbook(archivo);
             XSSFSheet sheet = workbook.getSheetAt(0);
             int condicional = 0;
             for(Row row : sheet){
                 if(condicional == 0 ){
                     condicional++;
                 }else{
+                    System.out.println(row.getCell(3));
                     UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
                     usuarioDireccion.Usuario = new Usuario();
                     usuarioDireccion.Usuario.setNombreUsuario(row.getCell(0) != null ? row.getCell(0).toString() : "");
                     usuarioDireccion.Usuario.setApellidoPaterno(row.getCell(1) != null ? row.getCell(1).toString() : "");
                     usuarioDireccion.Usuario.setApellidoMaterno(row.getCell(2) != null ? row.getCell(2).toString() : "");
-                    usuarioDireccion.Usuario.setFechaNacimiento(row.getCell(4).getDateCellValue());
+                     String fecha = row.getCell(3).toString();
+                    SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+                    Date fechaconvertida = formato.parse(fecha);
+                    usuarioDireccion.Usuario.setFechaNacimiento(fechaconvertida);
                     usuarioDireccion.Usuario.setNumeroTelefono((long) row.getCell(4).getNumericCellValue());
                     usuarioDireccion.Usuario.setEmail(row.getCell(5) != null ? row.getCell(5).toString() : "");
                     usuarioDireccion.Usuario.setPassword(row.getCell(6) != null ? row.getCell(6).toString() : "");
@@ -247,7 +279,14 @@ public class UsuarioController {
                     usuarioDireccion.Usuario.setUserName(row.getCell(10) != null ? row.getCell(10).toString() : "");
                     usuarioDireccion.Usuario.Rol = new Rol();
                     usuarioDireccion.Usuario.Rol.setIdRol((int)row.getCell(11).getNumericCellValue());
-                    usuarioDireccion.Usuario.setEstado((int)row.getCell(12).getNumericCellValue());
+                    usuarioDireccion.Usuario.setFotografia(row.getCell(12).toString());
+                    usuarioDireccion.Usuario.setEstado((int)row.getCell(13).getNumericCellValue());
+                    usuarioDireccion.Direccion = new Direccion();
+                    usuarioDireccion.Direccion.setCalle(row.getCell(14).toString());
+                    usuarioDireccion.Direccion.setNumeroInterior(row.getCell(15).toString());
+                    usuarioDireccion.Direccion.setNumeroExterior(row.getCell(16).toString());
+                    usuarioDireccion.Direccion.Colonia = new Colonia();
+                    usuarioDireccion.Direccion.Colonia.setIdColonia((int) row.getCell(17).getNumericCellValue());
 
                     usuariosDireccion.add(usuarioDireccion);
                 }
@@ -255,6 +294,7 @@ public class UsuarioController {
             
         }catch(Exception ex){
             System.out.println("Error al capturar los datos: "+ex);
+            usuariosDireccion.clear();
         }
         
         return usuariosDireccion;
@@ -274,18 +314,18 @@ public class UsuarioController {
             for(UsuarioDireccion usuarioDireccion : usuarios){
                 if(usuarioDireccion.Usuario.getNombreUsuario() == null || usuarioDireccion.Usuario.getNombreUsuario().equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getNombreUsuario(), "Error: El campo 'Nombre' no puede estar vacio"));
-                } else if(usuarioDireccion.Usuario.getNombreUsuario().matches("^[A-Za-zÁÉÍÓÚáéíóúÑñ]+( [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$")){
+                } else if(!usuarioDireccion.Usuario.getNombreUsuario().matches("^[A-Za-zÁÉÍÓÚáéíóúÑñ]+( [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getNombreUsuario(), "Error: El campo 'Nombre' no es valido por un caracter especial, espacio o número"));
                 }
                 
                 if(usuarioDireccion.Usuario.getApellidoPaterno() == null || usuarioDireccion.Usuario.getApellidoPaterno().equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getApellidoPaterno(), "Error: El campo 'Apellido Paterno' no puede estar vacio"));
-                } else if(usuarioDireccion.Usuario.getApellidoPaterno().matches("^[A-Za-zÁÉÍÓÚáéíóúÑñ]+( [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$")){
+                } else if(!usuarioDireccion.Usuario.getApellidoPaterno().matches("^[A-Za-zÁÉÍÓÚáéíóúÑñ]+( [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getApellidoPaterno(), "Error: El campo 'Apellido Paterno' no es valido por un caracter especial, espacio o número"));
                 }
                 
                 if(usuarioDireccion.Usuario.getApellidoMaterno() != null || !usuarioDireccion.Usuario.getApellidoMaterno().isEmpty()){
-                    if(usuarioDireccion.Usuario.getApellidoMaterno().matches("^[A-Za-zÁÉÍÓÚáéíóúÑñ]+( [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$")){
+                    if(!usuarioDireccion.Usuario.getApellidoMaterno().matches("^[A-Za-zÁÉÍÓÚáéíóúÑñ]+( [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$")){
                         listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getApellidoMaterno(), "Error: El campo 'Apellido Paterno' no puede estar vacio"));
                     }
                 }
@@ -295,57 +335,58 @@ public class UsuarioController {
                 if(usuarioDireccion.Usuario.getFechaNacimiento() == null || usuarioDireccion.Usuario.getFechaNacimiento().equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, fecha , "Error: El campo 'Fecha de Nacimiento' no puede estar vacio o no cumple con el formato: yyyy-MM-dd"));
                 }
+                
                 if(Long.toString(usuarioDireccion.Usuario.getNumeroTelefono()) == null || Long.toString(usuarioDireccion.Usuario.getNumeroTelefono()).equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, Long.toString(usuarioDireccion.Usuario.getNumeroTelefono()), "Error: El campo 'Numero de telefono' no debe se estar vacio"));
-                } else if(Long.toString(usuarioDireccion.Usuario.getNumeroTelefono()).matches("^[d{10}]$")){
+                } else if(!Long.toString(usuarioDireccion.Usuario.getNumeroTelefono()).matches("^\\d{10}$")){
                     listaErrores.add(new ResultValidarDatos(fila, Long.toString(usuarioDireccion.Usuario.getNumeroTelefono()), "Error: El campo 'Numero de telefono' solo admite 10 números"));
                 }
                 
                 if(usuarioDireccion.Usuario.getEmail() == null || usuarioDireccion.Usuario.getEmail().equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getEmail(), "Error: El campo 'Correo Electronico' no puede estar vacio"));
-                }else if(usuarioDireccion.Usuario.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\\.[a-zA-Z]{1,4}$")){
+                }else if(!usuarioDireccion.Usuario.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\\.[a-zA-Z]{1,4}$")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getEmail(), "Error: El campo 'Correo Electronico' no es valido."));
                 }
                 
                 if(usuarioDireccion.Usuario.getPassword() == null || usuarioDireccion.Usuario.getPassword().equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getPassword(), "Error: El campo 'Contraseña' no puede estar vacio"));
-                }else if(usuarioDireccion.Usuario.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d]).{8,}$")){
+                }else if(!usuarioDireccion.Usuario.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d]).{8,}$")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getPassword(), "Error: El campo 'Contraseña' no cumple con las especificaciones. Debe de contener al menos una letra mayuscula, una minuscula, un número y un caracter especial con una longitud mínima de 8 digitos."));
                 }
                 
                 if(Character.toString(usuarioDireccion.Usuario.getSexo()) == null || Character.toString(usuarioDireccion.Usuario.getSexo()).equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, Character.toString(usuarioDireccion.Usuario.getSexo()), "Error: El campo 'Sexo' no puede estar vacio"));
-                }else if(Character.toString(usuarioDireccion.Usuario.getSexo()).matches("^[MH]$")){
+                }else if(!Character.toString(usuarioDireccion.Usuario.getSexo()).matches("^[MH]$")){
                     listaErrores.add(new ResultValidarDatos(fila, Character.toString(usuarioDireccion.Usuario.getSexo()), "Error: El campo 'Sexo' solo puede ser H o M."));
                 }
                 
-                if(usuarioDireccion.Usuario.getCelular() != null || !usuarioDireccion.Usuario.getCelular().isEmpty()){
-                    if(usuarioDireccion.Usuario.getCelular().matches("^[d{10}]$")){
+                if(usuarioDireccion.Usuario.getCelular() != null && !usuarioDireccion.Usuario.getCelular().isEmpty()){
+                    if(!usuarioDireccion.Usuario.getCelular().matches("^\\d{10}$")){
                         listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getCelular(), "Error: El campo 'Número de Celular' solo puedo tener 10 números."));
                     }
                 }
                 
-                if(usuarioDireccion.Usuario.getCURP() != null || !usuarioDireccion.Usuario.getCURP().isEmpty()){
-                    if(usuarioDireccion.Usuario.getCURP().matches("^^[A-Z]{4}\\d{6}[A-Z]{6}\\d{2}$")){
+                if(usuarioDireccion.Usuario.getCURP() != null && !usuarioDireccion.Usuario.getCURP().isEmpty()){
+                    if(!usuarioDireccion.Usuario.getCURP().matches("^[A-Z]{4}\\d{6}[A-Z]{6}\\d{2}$")){
                         listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getCURP(), "Error: El campo 'CURP' no es valido"));
                     }   
                 }
                 
                 if(usuarioDireccion.Usuario.getUserName() == null || usuarioDireccion.Usuario.getUserName().equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getUserName(), "Error: El campo 'Nombre de Usuario' no puede estar vacio"));
-                }else if(usuarioDireccion.Usuario.getUserName().matches("^[a-zA-Z0-9._ -]{2,20}$")){
+                }else if(!usuarioDireccion.Usuario.getUserName().matches("^[a-zA-Z0-9._ -]{2,20}$")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getUserName(), "Error: El campo 'Nombre de Usuario' no cumple con las especificaciones"));                    
                 }
                 
                 if(String.valueOf(usuarioDireccion.Usuario.Rol.getIdRol()) == null || String.valueOf(usuarioDireccion.Usuario.Rol.getIdRol()).equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, Integer.toString(usuarioDireccion.Usuario.Rol.getIdRol()), "Error: El campo 'Id Rol' no debe se estar vacio"));
-                } else if(String.valueOf(usuarioDireccion.Usuario.Rol.getIdRol()).matches("^[d{4}]$")){
+                } else if(!String.valueOf(usuarioDireccion.Usuario.Rol.getIdRol()).matches("^\\d{1,4}$")){
                     listaErrores.add(new ResultValidarDatos(fila,String.valueOf(usuarioDireccion.Usuario.Rol.getIdRol()), "Error: El campo 'Id Rol' solo admite números"));
                 }
                 
                 if(String.valueOf(usuarioDireccion.Usuario.getEstado()) == null || String.valueOf(usuarioDireccion.Usuario.getEstado()).equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, Integer.toString(usuarioDireccion.Usuario.getEstado()), "Error: El campo 'Estado' no debe se estar vacio"));
-                } else if(String.valueOf(usuarioDireccion.Usuario.getEstado()).matches("^[01]$")){
+                } else if(!String.valueOf(usuarioDireccion.Usuario.getEstado()).matches("^[01]$")){
                     listaErrores.add(new ResultValidarDatos(fila,String.valueOf(usuarioDireccion.Usuario.getEstado()), "Error: El campo 'Estado' solo admite un 0 o un 1"));
                 }
             }
@@ -354,6 +395,30 @@ public class UsuarioController {
         return listaErrores;
     } 
     
+    @GetMapping("/cargamasiva/procesar")
+    public String procesarCargaMasiva(HttpSession session){
+        
+        String ruta = session.getAttribute("path").toString();
+        String tipoarchivo = session.getAttribute("path").toString().split("\\.")[1];
+        
+        if(ruta != null && tipoarchivo != null){
+            File archivo = new File(ruta);
+            List<UsuarioDireccion> usuariosDireccion = new ArrayList<>();
+            
+            if(tipoarchivo == "txt"){
+                usuariosDireccion = LecturaArchivoTXT((MultipartFile) archivo);
+            }
+            if(tipoarchivo == "xlsx"){
+                usuariosDireccion = LecturaArchivoExcel(archivo);
+            }
+            
+            usuarioDAOImplementation.InsercionMasiva(usuariosDireccion);
+        }
+        
+        session.removeAttribute("path");
+        
+        return "CargaMasiva";
+    }
     
 //**********************************************************************************************************************************    
 //**********************************************************************************************************************************    
@@ -403,18 +468,19 @@ public class UsuarioController {
             model.addAttribute("paises", paisDAOImplementation.GetAllPais().objects);
             
         }else{  // ---->> EDITAR DIRECCION 
-            Direccion direccion = new Direccion();
-            direccion = (Direccion) direccionDAOImplementation.DireccionesEditSP(IdDireccion).object;
             UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
+            usuarioDireccion.Direccion = new Direccion();
+            usuarioDireccion.Direccion = (Direccion) direccionDAOImplementation.DireccionesAllSP(IdDireccion).object;
             usuarioDireccion.Usuario = new Usuario();
             usuarioDireccion.Usuario.setIdUsuario(IdUsuario);
-            usuarioDireccion.Direccion = new Direccion();
             model.addAttribute("usuarioDireccion", usuarioDireccion);
-            model.addAttribute("direccion", direccion);
+            model.addAttribute("direccion", usuarioDireccion.Direccion);
+            
+            //Recuperar datos de las tablas de pais, estado, municipio y colonia.
             model.addAttribute("paises", paisDAOImplementation.GetAllPais().objects);
-            model.addAttribute("estados", estadoDAOImplementation.GetAllEstados(direccion.Colonia.Municipio.Estado.Pais.getIdPais()).objects);
-            model.addAttribute("minicipios", municipioDAOImplementation.GetAllMunicipios(direccion.Colonia.Municipio.Estado.getIdEstado()).objects);
-            model.addAttribute("colonia", coloniaDAOImplementation.GetAllColonias(direccion.Colonia.Municipio.getIdMunicipio()).objects);
+            model.addAttribute("estados", estadoDAOImplementation.GetAllEstados(usuarioDireccion.Direccion.Colonia.Municipio.Estado.Pais.getIdPais()).objects);
+            model.addAttribute("municipios", municipioDAOImplementation.GetAllMunicipios(usuarioDireccion.Direccion.Colonia.Municipio.Estado.getIdEstado()).objects);
+            model.addAttribute("colonia", coloniaDAOImplementation.GetAllColonias(usuarioDireccion.Direccion.Colonia.Municipio.getIdMunicipio()).objects);
         }
         return "Formulario";
     }

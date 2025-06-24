@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -133,7 +134,7 @@ public class UsuarioDAOImplementation implements IUsuarioDAO{
         Result result = new Result();
         
         try{
-            jdbcTemplate.execute("{CALL UsuarioAddSP(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (CallableStatementCallback<Integer>) callableStatement ->{
+            jdbcTemplate.execute("{CALL UsuarioAddSP(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (CallableStatementCallback<Integer>) callableStatement ->{
             
             callableStatement.setString(1, usuarioDireccion.Usuario.getNombreUsuario());
             callableStatement.setString(2, usuarioDireccion.Usuario.getApellidoPaterno());
@@ -148,10 +149,11 @@ public class UsuarioDAOImplementation implements IUsuarioDAO{
             callableStatement.setString(11, usuarioDireccion.Usuario.getUserName());
             callableStatement.setInt(12, usuarioDireccion.Usuario.Rol.getIdRol());
             callableStatement.setString(13, usuarioDireccion.Usuario.getFotografia());
-            callableStatement.setString(14, usuarioDireccion.Direccion.getCalle());
-            callableStatement.setString(15, usuarioDireccion.Direccion.getNumeroInterior());
-            callableStatement.setString(16, usuarioDireccion.Direccion.getNumeroExterior());
-            callableStatement.setInt(17, usuarioDireccion.Direccion.Colonia.getIdColonia());
+            callableStatement.setInt(14, usuarioDireccion.Usuario.getEstado());
+            callableStatement.setString(15, usuarioDireccion.Direccion.getCalle());
+            callableStatement.setString(16, usuarioDireccion.Direccion.getNumeroInterior());
+            callableStatement.setString(17, usuarioDireccion.Direccion.getNumeroExterior());
+            callableStatement.setInt(18, usuarioDireccion.Direccion.Colonia.getIdColonia());
             
             int rowAffected = callableStatement.executeUpdate();
             
@@ -410,6 +412,24 @@ public class UsuarioDAOImplementation implements IUsuarioDAO{
                 result.errorMessage = ex.getLocalizedMessage();
                 result.ex = ex;
             }
+        
+        return result;
+    }
+
+    @Override
+    public Result InsercionMasiva(List<UsuarioDireccion> usuariosDireccion) {
+        
+        Result result = new Result();
+        
+        try{
+            for(UsuarioDireccion usuarioDireccion : usuariosDireccion){
+                this.Add(usuarioDireccion);
+            }
+        }catch(Exception ex){
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
         
         return result;
     }

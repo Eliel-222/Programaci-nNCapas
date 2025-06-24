@@ -21,7 +21,7 @@ public class DireccionDAOImplementation implements IDireccionDAO{
     private JdbcTemplate jdbcTemplate;
     
     @Override
-    public Result DireccionesEditSP(int IdDireccion) {
+    public Result DireccionesAllSP(int IdDireccion) {
         
         Result result = new Result();
         
