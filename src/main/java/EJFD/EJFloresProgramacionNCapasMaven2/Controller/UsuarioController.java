@@ -7,6 +7,7 @@ import EJFD.EJFloresProgramacionNCapasMaven2.DAO.MunicipioDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.PaisDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.RolDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.UsuarioDAOImplementation;
+import EJFD.EJFloresProgramacionNCapasMaven2.DAO.UsuarioJPADAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.Colonia;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.Direccion;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.Result;
@@ -18,18 +19,15 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.FileReader;
 import static java.lang.Long.parseLong;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -64,6 +62,8 @@ public class UsuarioController {
     private ColoniaDAOImplementation coloniaDAOImplementation;
     @Autowired
     private DireccionDAOImplementation direccionDAOImplementation;
+    @Autowired
+    private UsuarioJPADAOImplementation usuarioJPADAOImplementation;
     
 //**********************************************************************************************************************************    
 //**********************************************************************************************************************************    
@@ -135,11 +135,12 @@ public class UsuarioController {
             Result result = new Result();
             
             if(usuarioDireccion.Usuario.getIdUsuario() == 0 && usuarioDireccion.Direccion.getIdDireccion() == 0){
-                result = usuarioDAOImplementation.Add(usuarioDireccion); //Agregar usuario y direccion
+                //result = usuarioDAOImplementation.Add(usuarioDireccion); //Agregar usuario y direccion
+                result = usuarioJPADAOImplementation.UsuarioADDJPA(usuarioDireccion); //Agregar usuario y direccion
                 
             }else if(usuarioDireccion.Usuario.getIdUsuario() > 0 && usuarioDireccion.Direccion.getIdDireccion() == -1){
                 
-                result = usuarioDAOImplementation.UsuarioUptadteSP(usuarioDireccion); //Editar solamente usuario
+                //result = usuarioDAOImplementation.UsuarioUptadteSP(usuarioDireccion); //Editar solamente usuario
                 
             }else if(usuarioDireccion.Usuario.getIdUsuario() > 0 && usuarioDireccion.Direccion.getIdDireccion() > 0){
                 
@@ -174,7 +175,7 @@ public class UsuarioController {
             List<UsuarioDireccion> usuariosDireccion = new ArrayList<>();
 
             if (fileExtention.equals("txt")) {
-                usuariosDireccion = LecturaArchivoTXT(archivo);
+                usuariosDireccion = LecturaArchivoTXT(new File (absolutePath));
                 
             } else { //"xlsx"
                  usuariosDireccion = LecturaArchivoExcel(new File(absolutePath));
@@ -199,11 +200,11 @@ public class UsuarioController {
     }
     
     
-    public List<UsuarioDireccion> LecturaArchivoTXT(MultipartFile archivo) {
+    public List<UsuarioDireccion> LecturaArchivoTXT(File archivo) {
 
         List<UsuarioDireccion> usuariosDireccion = new ArrayList<>();
 
-        try (InputStream inputStream = archivo.getInputStream(); BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(archivo));) {
 
             bufferedReader.readLine();
             String linea = "";
@@ -232,17 +233,19 @@ public class UsuarioController {
                 usuarioDireccion.Usuario.Rol = new Rol();
                 usuarioDireccion.Usuario.Rol.setIdRol(Integer.parseInt(datos[11]));
                 usuarioDireccion.Usuario.setFotografia(datos[12]);
+                usuarioDireccion.Direccion = new Direccion();
                 usuarioDireccion.Usuario.setEstado(Integer.parseInt(datos[13]));
-                usuarioDireccion.Direccion.setIdDireccion(Integer.parseInt(datos[14]));
-                usuarioDireccion.Direccion.setCalle(datos[15]);
-                usuarioDireccion.Direccion.setNumeroInterior(datos[16]);
-                usuarioDireccion.Direccion.setNumeroExterior(datos[17]);
-                usuarioDireccion.Direccion.Colonia.setIdColonia(Integer.parseInt(datos[18]));
+                usuarioDireccion.Direccion.setCalle(datos[14]);
+                usuarioDireccion.Direccion.setNumeroInterior(datos[15]);
+                usuarioDireccion.Direccion.setNumeroExterior(datos[16]);
+                usuarioDireccion.Direccion.Colonia = new Colonia();
+                usuarioDireccion.Direccion.Colonia.setIdColonia(Integer.parseInt(datos[17]));
                 
                 usuariosDireccion.add(usuarioDireccion);
 
             }
         } catch (Exception ex) {
+            System.out.println("Error "+ex);
             usuariosDireccion = null;
         }
         return usuariosDireccion;
@@ -366,11 +369,11 @@ public class UsuarioController {
                     }
                 }
                 
-                if(usuarioDireccion.Usuario.getCURP() != null && !usuarioDireccion.Usuario.getCURP().isEmpty()){
+                /*if(usuarioDireccion.Usuario.getCURP() != null && !usuarioDireccion.Usuario.getCURP().isEmpty()){
                     if(!usuarioDireccion.Usuario.getCURP().matches("^[A-Z]{4}\\d{6}[A-Z]{6}\\d{2}$")){
                         listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getCURP(), "Error: El campo 'CURP' no es valido"));
                     }   
-                }
+                }*/
                 
                 if(usuarioDireccion.Usuario.getUserName() == null || usuarioDireccion.Usuario.getUserName().equals("")){
                     listaErrores.add(new ResultValidarDatos(fila, usuarioDireccion.Usuario.getUserName(), "Error: El campo 'Nombre de Usuario' no puede estar vacio"));
@@ -405,8 +408,8 @@ public class UsuarioController {
             File archivo = new File(ruta);
             List<UsuarioDireccion> usuariosDireccion = new ArrayList<>();
             
-            if(tipoarchivo == "txt"){
-                usuariosDireccion = LecturaArchivoTXT((MultipartFile) archivo); //Se debe de corregis ese casteo
+            if(tipoarchivo.equals("txt")){
+                usuariosDireccion = LecturaArchivoTXT(archivo);
             }
             if(tipoarchivo.equals("xlsx")){
                 usuariosDireccion = LecturaArchivoExcel(archivo);

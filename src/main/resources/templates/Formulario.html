@@ -40,11 +40,6 @@
                                 <input type="text" class="form-control" id="ApellidoMaterno" name="ApellidoMaterno" placeholder="Sabala" th:field="*{Usuario.ApellidoMaterno}">
                                 <span class="text-danger" th:if="${#fields.hasErrors('Usuario.ApellidoMaterno')}" th:errors="*{Usuario.ApellidoMaterno}"></span>
                             </div>
-                            <div class="row">
-                                <label for="exampleFormControlInput1" class="form-label mt-4">CURP</label>
-                                <input type="text" class="form-control" id="CURP" name="CURP" placeholder="18 DIGITOS" th:field="*{Usuario.CURP}">
-                                <span class="text-danger" th:if="${#fields.hasErrors('Usuario.CURP')}" th:errors="*{Usuario.CURP}"></span>
-                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -285,17 +280,6 @@
                     });
                 });
 
-                $('#CURP').on('input', function () {
-                    const valor = $(this).val();
-                    const regex = /^[A-Z]{4}\d{6}[A-Z]{6}\d{2}$/;
-
-                    if (regex.test(valor.trim())) {
-                        mostrarValido($(this));
-                    } else {
-                        mostrarInvalido($(this), "CURP no válido. Debe tener 18 caracteres alfanuméricos.");
-                    }
-                });
-                
                 $('input[name="sexo"]').on('change', function () {
                     if ($('input[name="sexo"]:checked').length > 0) {
                         mostrarValido($('input[name="sexo"]').first());
@@ -338,7 +322,7 @@
                     }
                 });
 
-                $('#password').on('input', function () {
+                $('#Password').on('input', function () {
                     const valor = $(this).val();
                     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$/;
 
