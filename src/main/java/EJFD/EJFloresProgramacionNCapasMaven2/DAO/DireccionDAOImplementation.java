@@ -46,6 +46,7 @@ public class DireccionDAOImplementation implements IDireccionDAO{
                     
                     direccion.Colonia = new Colonia();
                     direccion.Colonia.setIdColonia(resultSet.getInt("IdColonia"));
+                    direccion.Colonia.setCodigoPostal(resultSet.getString("CodigoPostal"));
                     
                     direccion.Colonia.Municipio = new Municipio();
                     direccion.Colonia.Municipio.setIdMunicipio(resultSet.getInt("IdMunicipio"));

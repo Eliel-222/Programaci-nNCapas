@@ -8,15 +8,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table (name = "Pais")
+@Table (name = "PAIS")
 public class Pais {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "IdPais")
+    @Column(name = "idpais")
     private int IdPais;
     
-    @Column(name = "Nombre")
+    @Column(name = "nombre")
     private String Nombre;
     
     public Pais(){

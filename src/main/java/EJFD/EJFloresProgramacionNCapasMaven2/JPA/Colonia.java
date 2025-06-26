@@ -10,21 +10,21 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table (name = "Colonia")
+@Table (name = "COLONIA")
 public class Colonia {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "IdColonia")
+    @Column(name = "idcolonia")
     private int IdColonia;
     
-    @Column(name = "Nombre")
+    @Column(name = "nombre")
     private String Nombre;
     
-    @Column(name = "CodigoPostal")
+    @Column(name = "codigopostal")
     private String CodigoPostal;
     
-    @JoinColumn(name = "IdMunicipio")
+    @JoinColumn(name = "idmunicipio")
     @ManyToOne
     public Municipio Municipio;
     

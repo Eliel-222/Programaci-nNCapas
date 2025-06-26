@@ -2,6 +2,7 @@ package EJFD.EJFloresProgramacionNCapasMaven2.Controller;
 
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.ColoniaDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.DireccionDAOImplementation;
+import EJFD.EJFloresProgramacionNCapasMaven2.DAO.DireccionJPADAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.EstadoDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.MunicipioDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.PaisDAOImplementation;
@@ -64,13 +65,15 @@ public class UsuarioController {
     private DireccionDAOImplementation direccionDAOImplementation;
     @Autowired
     private UsuarioJPADAOImplementation usuarioJPADAOImplementation;
+    @Autowired
+    private DireccionJPADAOImplementation direccionJPADAOImplementation;
     
 //**********************************************************************************************************************************    
 //**********************************************************************************************************************************    
     
     @GetMapping //Carga la vista orincioal del HTML
     public String Index (Model model){
-        Result result = usuarioDAOImplementation.GetAll();
+        Result result = usuarioJPADAOImplementation.UsuarioGetAllJPA();
         
         if(result.correct){
             model.addAttribute("usuariosDireccion", result.objects);
@@ -106,7 +109,7 @@ public class UsuarioController {
             return "Formulario";
             
         }else{//Muestra la información del usuario seleccionado en otro formulario
-            Result result = usuarioDAOImplementation.GetAllById(idUsuario);
+            Result result = usuarioJPADAOImplementation.UsuarioGetByIdJPA(idUsuario);
             model.addAttribute("usuarioDireccion", result.object);
             return "UsuarioDatails";
         }
@@ -135,15 +138,15 @@ public class UsuarioController {
             Result result = new Result();
             
             if(usuarioDireccion.Usuario.getIdUsuario() == 0 && usuarioDireccion.Direccion.getIdDireccion() == 0){
-                //result = usuarioDAOImplementation.Add(usuarioDireccion); //Agregar usuario y direccion
                 result = usuarioJPADAOImplementation.UsuarioADDJPA(usuarioDireccion); //Agregar usuario y direccion
                 
             }else if(usuarioDireccion.Usuario.getIdUsuario() > 0 && usuarioDireccion.Direccion.getIdDireccion() == -1){
                 
-                //result = usuarioDAOImplementation.UsuarioUptadteSP(usuarioDireccion); //Editar solamente usuario
+                result = usuarioJPADAOImplementation.UsuarioUpdateJPA(usuarioDireccion); //Editar solamente usuario
                 
             }else if(usuarioDireccion.Usuario.getIdUsuario() > 0 && usuarioDireccion.Direccion.getIdDireccion() > 0){
                 
+                result = direccionJPADAOImplementation.DireccionEditJPA(usuarioDireccion);
             }
             
         return "redirect:/usuario";
@@ -198,7 +201,6 @@ public class UsuarioController {
         }
         return "CargaMasiva";
     }
-    
     
     public List<UsuarioDireccion> LecturaArchivoTXT(File archivo) {
 
@@ -455,7 +457,7 @@ public class UsuarioController {
         if(IdDireccion == -1){ // ---->>> EDITAR USUARIO
             
             UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
-            usuarioDireccion = (UsuarioDireccion) usuarioDAOImplementation.GetAllById(IdUsuario).object;
+            usuarioDireccion = (UsuarioDireccion) usuarioJPADAOImplementation.UsuarioGetByIdJPA(IdUsuario).object;
             usuarioDireccion.Direccion = new Direccion();
             usuarioDireccion.Direccion.setIdDireccion(-1);
             model.addAttribute("usuarioDireccion", usuarioDireccion); //Se debe de colocar el IdUsuario para recuperar la información y mostrarla en el formulario

@@ -6,33 +6,32 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table (name = "Direccion")
+@Table (name = "DIRECCION")
 public class Direccion {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "IdDireccion")
+    @Column(name = "iddireccion")
     private int IdDireccion;
     
-    @Column(name = "Calle")
+    @Column(name = "calle")
     private String Calle;
     
-    @Column(name = "NumeroInterior")
+    @Column(name = "numerointerior")
     private String NumeroInterior;
     
-    @Column(name = "NumeroExterior")
+    @Column(name = "numeroexterior")
     private String NumeroExterior;
     
-    @JoinColumn(name = "")
+    @JoinColumn(name = "idcolonia")
     @ManyToOne
     public Colonia Colonia;
     
-    @JoinColumn(name = "IdUsuario")
+    @JoinColumn(name = "idusuario")
     @ManyToOne
     public Usuario Usuario;
     

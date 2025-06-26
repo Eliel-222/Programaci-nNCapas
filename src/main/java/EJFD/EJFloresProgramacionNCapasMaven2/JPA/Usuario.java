@@ -9,79 +9,72 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import java.util.Date;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
-@Table(name = "Usuario")
+@Table(name = "USUARIO")
 public class Usuario {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "IdUsuario")
+    @Column(name = "idusuario")
     private int IdUsuario;
     
     //@Size(min=3, max=15, message = "El nombre debe de conener entre 3 y 15 letras")
     //@NotEmpty (message = "Ingresa dato: @")
-    @Column(name = "NombreUsuario")
+    @Column(name = "nombreusuario")
     private String NombreUsuario;
     
     //@Size(min=3, max=15, message = "El apellido paterno debe de conener entre 3 y 15 letras")
     //@NotEmpty (message = "Ingresa dato: @")
-    @Column(name = "ApellidoPaterno")
+    @Column(name = "apellidopaterno")
     private String ApellidoPaterno;
     
     //@Size(min=3, max=15, message = "El apellido materno debe de conener entre 3 y 15 letras")
     //@NotEmpty (message = "Ingresa dato: @")
-    @Column(name = "ApellidoMaterno")
+    @Column(name = "apellidomaterno")
     private String ApellidoMaterno;
     
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "FechaNacimiento")
+    @Column(name = "fechanacimiento")
     private Date FechaNacimiento;
     
     //@Digits(integer = 10, fraction = 0, message = "Debe tener exactamente 10 dígitos")
-    @Column(name = "NumeroTelefono")
+    @Column(name = "numerotelefono")
     private long NumeroTelefono;
     
     //@Pattern(regexp = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$", message = "Correo invalido")
-    @Column(name = "Email")
+    @Column(name = "email")
     private String Email;
     
     //@Pattern(regexp = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&._-])[A-Za-z\\d@$!%*?&._-]{8,}$/", message = "Debe de tener Mayusculas, minusculas, numeros y un caracter especial")
-    @Column(name = "Password")
+    @Column(name = "password")
     private String Password;
     
     //@NotNull(message = "Selecciona una opción")
-    @Column(name = "Sexo")
+    @Column(name = "sexo")
     private char Sexo;
     
     //@Pattern(regexp = "/^\\d{10}$/", message = "Numero invalido")
-    @Column(name = "Celular")
+    @Column(name = "celular")
     private String Celular;
     
-    //@Pattern(regexp = "/^[A-Z]{4}\\d{6}[A-Z]{6}\\d{2}$/", message ="No cumple con el formato de CURP")
-   // @Column(name = "CURP")
-   // private String CURP;
+    @Column(name = "curp")
+    private String CURP;
     
     //@NotEmpty(message = "Escribe un nombre de usuario")
-    @Column(name = "UserName")
+    @Column(name = "username")
     private String UserName;
     
     @Lob
-    @Column(name = "Fotografia")
+    @Column(name = "fotografia")
     private String Fotografia;
     
-    @Column(name = "Estado")
+    @Column(name = "estado")
     private int Estado;
     
-    @JoinColumn(name = "IdRol")
+    @JoinColumn(name = "idrol")
     @ManyToOne
     public Rol Rol;
     
@@ -90,7 +83,7 @@ public class Usuario {
     }
     
     public Usuario(int IdUsuario, String NombreUsuario, String ApellidoPaterno, String ApellidoMaterno, Date FechaNacimiento, long NumeroTelefono,
-                    String Email, String Password, char Sexo, String Celular, String UserName, String Fotografia, int Estado){
+                    String Email, String Password, char Sexo, String Celular, String CURP, String UserName, String Fotografia, int Estado){
         
         this.IdUsuario = IdUsuario;
         this.NombreUsuario = NombreUsuario;
@@ -102,11 +95,12 @@ public class Usuario {
         this.Password = Password;
         this.Sexo = Sexo;
         this.Celular = Celular;
-        //this.CURP = CURP;
+        this.CURP = CURP;
         this.UserName = UserName;
         this.Fotografia = Fotografia;
         this.Estado = Estado;
     }
+
     
     public int getIdUsuario(){
         return IdUsuario;
@@ -219,4 +213,13 @@ public class Usuario {
     public void setRol(Rol Rol){
         this.Rol = Rol;
     }
+
+    public String getCURP() {
+        return CURP;
+    }
+
+    public void setCURP(String CURP) {
+        this.CURP = CURP;
+    }
+
 }

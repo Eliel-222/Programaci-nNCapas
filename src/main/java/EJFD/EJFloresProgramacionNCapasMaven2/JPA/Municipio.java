@@ -10,18 +10,18 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table (name = "Municipio")
+@Table (name = "MUNICIPIO")
 public class Municipio {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "IdMunicipio")
+    @Column(name = "idmunicipio")
     private int IdMunicipio;
     
-    @Column(name = "Nombre")
+    @Column(name = "nombre")
     private String Nombre;
     
-    @JoinColumn(name = "IdEstado")
+    @JoinColumn(name = "idestado")
     @ManyToOne
     public Estado Estado;
     
