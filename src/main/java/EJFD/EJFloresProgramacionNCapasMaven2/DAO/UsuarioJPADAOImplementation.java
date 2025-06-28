@@ -45,12 +45,13 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPADAO{
             usuarioJPA.setRol(rol);
 
             entityManager.persist(usuarioJPA);
-            entityManager.flush(); 
+            //entityManager.flush(); 
             
             Direccion direccionJPA = new Direccion();
             direccionJPA.setCalle(usuarioDireccion.Direccion.getCalle());
             direccionJPA.setNumeroInterior(usuarioDireccion.Direccion.getNumeroInterior());
             direccionJPA.setNumeroExterior(usuarioDireccion.Direccion.getNumeroExterior());
+            direccionJPA.Usuario.setIdUsuario(usuarioJPA.getIdUsuario());
 
             Colonia colonia = new Colonia();
             colonia.setIdColonia(usuarioDireccion.Direccion.Colonia.getIdColonia());
@@ -276,6 +277,27 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPADAO{
         Result result = new Result();
         
         
+        
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Result InsercionMasivaJPA(List<UsuarioDireccion> usuariosDireccion) {
+        
+        Result result = new Result();
+        
+        try{
+            
+            for(UsuarioDireccion usuarioDireccion : usuariosDireccion){
+                this.UsuarioADDJPA(usuarioDireccion);
+            }
+            
+        }catch(Exception ex){
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
         
         return result;
     }

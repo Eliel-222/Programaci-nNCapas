@@ -1,12 +1,11 @@
 package EJFD.EJFloresProgramacionNCapasMaven2.Controller;
 
-import EJFD.EJFloresProgramacionNCapasMaven2.DAO.ColoniaDAOImplementation;
-import EJFD.EJFloresProgramacionNCapasMaven2.DAO.DireccionDAOImplementation;
+import EJFD.EJFloresProgramacionNCapasMaven2.DAO.ColoniaJPADAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.DireccionJPADAOImplementation;
-import EJFD.EJFloresProgramacionNCapasMaven2.DAO.EstadoDAOImplementation;
-import EJFD.EJFloresProgramacionNCapasMaven2.DAO.MunicipioDAOImplementation;
-import EJFD.EJFloresProgramacionNCapasMaven2.DAO.PaisDAOImplementation;
-import EJFD.EJFloresProgramacionNCapasMaven2.DAO.RolDAOImplementation;
+import EJFD.EJFloresProgramacionNCapasMaven2.DAO.EstadoJPADAOImplementation;
+import EJFD.EJFloresProgramacionNCapasMaven2.DAO.MunicipioJPADAOImplementation;
+import EJFD.EJFloresProgramacionNCapasMaven2.DAO.PaisJPADAOImplementation;
+import EJFD.EJFloresProgramacionNCapasMaven2.DAO.RolJPADAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.UsuarioDAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.DAO.UsuarioJPADAOImplementation;
 import EJFD.EJFloresProgramacionNCapasMaven2.ML.Colonia;
@@ -52,17 +51,15 @@ public class UsuarioController {
     @Autowired
     private UsuarioDAOImplementation usuarioDAOImplementation;
     @Autowired
-    private PaisDAOImplementation paisDAOImplementation;
+    private PaisJPADAOImplementation paisJPADAOImplementation;
     @Autowired
-    private RolDAOImplementation rolDAOImplementation;
+    private RolJPADAOImplementation rolJPADAOImplementation;
     @Autowired
-    private EstadoDAOImplementation estadoDAOImplementation;
+    private EstadoJPADAOImplementation estadoJPADAOImplementation;
     @Autowired
-    private MunicipioDAOImplementation municipioDAOImplementation;
+    private MunicipioJPADAOImplementation municipioJPADAOImplementation;
     @Autowired
-    private ColoniaDAOImplementation coloniaDAOImplementation;
-    @Autowired
-    private DireccionDAOImplementation direccionDAOImplementation;
+    private ColoniaJPADAOImplementation coloniaJPADAOImplementation;
     @Autowired
     private UsuarioJPADAOImplementation usuarioJPADAOImplementation;
     @Autowired
@@ -77,7 +74,7 @@ public class UsuarioController {
         
         if(result.correct){
             model.addAttribute("usuariosDireccion", result.objects);
-            model.addAttribute("roles", rolDAOImplementation.GetAllRol().objects);
+            model.addAttribute("roles", rolJPADAOImplementation.RolGetAllJPA().objects);
             model.addAttribute("usuario", new Usuario());
         }
         return "UsuarioIndex";
@@ -90,7 +87,7 @@ public class UsuarioController {
 
         model.addAttribute("usuario", new Usuario());
         model.addAttribute("usuariosDireccion", result.objects);
-        model.addAttribute("roles", rolDAOImplementation.GetAllRol().objects);
+        model.addAttribute("roles", rolJPADAOImplementation.RolGetAllJPA().objects);
         
         return "UsuarioIndex";
     }
@@ -102,10 +99,10 @@ public class UsuarioController {
     public String Formu (@PathVariable("idUsuario") int idUsuario ,Model model){
         
         if(idUsuario < 1){ //Carga solo informacion de pais, rol en el formulario dentro de los selects
-            Result result = paisDAOImplementation.GetAllPais();
+            Result result = paisJPADAOImplementation.PaisGetAllJPA();
             model.addAttribute("paises", result.objects);
             model.addAttribute("usuarioDireccion" , new UsuarioDireccion());
-            model.addAttribute("roles", rolDAOImplementation.GetAllRol().objects);
+            model.addAttribute("roles", rolJPADAOImplementation.RolGetAllJPA().objects);
             return "Formulario";
             
         }else{//Muestra la información del usuario seleccionado en otro formulario
@@ -117,36 +114,61 @@ public class UsuarioController {
     
     @PostMapping("Formulario")
     public String Formu(@Valid @ModelAttribute UsuarioDireccion usuarioDireccion, BindingResult bindinResult, Model model,
-                        @RequestParam("fotoPerfil") MultipartFile fotoPerfil){
+                        @RequestParam(value = "fotoPerfil", required = false) MultipartFile fotoPerfil){
                 
             if(bindinResult.hasErrors()){
             model.addAttribute("usuarioDireccion",usuarioDireccion);
             return "Formulario"; //Si existe un error, se retorna al formulario antes de guardar la información.
             }
 
-            try{
-                if(!fotoPerfil.isEmpty()){
-                    byte[] fotobase64 = fotoPerfil.getBytes();
-                    String fotoconvertida = Base64.getEncoder().encodeToString(fotobase64);
-                    usuarioDireccion.getUsuario().setFotografia(fotoconvertida);
-                }
-            }catch(Exception ex){
-                System.out.println("Error: "+ex);
-                return "Formulario";
-            }
             
             Result result = new Result();
             
             if(usuarioDireccion.Usuario.getIdUsuario() == 0 && usuarioDireccion.Direccion.getIdDireccion() == 0){
-                result = usuarioJPADAOImplementation.UsuarioADDJPA(usuarioDireccion); //Agregar usuario y direccion
                 
+                try{
+                    if(!fotoPerfil.isEmpty()){
+                        byte[] fotobase64 = fotoPerfil.getBytes();
+                        String fotoconvertida = Base64.getEncoder().encodeToString(fotobase64);
+                        usuarioDireccion.getUsuario().setFotografia(fotoconvertida);
+                    }
+                }catch(Exception ex){
+                    System.out.println("Error: "+ex);
+                    return "Formulario";
+                }
+                
+                result = usuarioJPADAOImplementation.UsuarioADDJPA(usuarioDireccion); //Agregar usuario y direccion
+                                
             }else if(usuarioDireccion.Usuario.getIdUsuario() > 0 && usuarioDireccion.Direccion.getIdDireccion() == -1){
+
+                try{
+                    if(!fotoPerfil.isEmpty()){
+                        byte[] fotobase64 = fotoPerfil.getBytes();
+                        String fotoconvertida = Base64.getEncoder().encodeToString(fotobase64);
+                        usuarioDireccion.getUsuario().setFotografia(fotoconvertida);
+                    }
+                }catch(Exception ex){
+                    System.out.println("Error: "+ex);
+                    return "Formulario";
+                }
                 
                 result = usuarioJPADAOImplementation.UsuarioUpdateJPA(usuarioDireccion); //Editar solamente usuario
+                
+                model.addAttribute("usuarioDireccion", usuarioJPADAOImplementation.UsuarioGetByIdJPA(usuarioDireccion.Usuario.getIdUsuario()).object);
+                return "UsuarioDatails";
                 
             }else if(usuarioDireccion.Usuario.getIdUsuario() > 0 && usuarioDireccion.Direccion.getIdDireccion() > 0){
                 
                 result = direccionJPADAOImplementation.DireccionEditJPA(usuarioDireccion);
+                model.addAttribute("usuarioDireccion", usuarioJPADAOImplementation.UsuarioGetByIdJPA(usuarioDireccion.Usuario.getIdUsuario()).object);
+                return "UsuarioDatails";
+                
+            }else if(usuarioDireccion.Usuario.getIdUsuario() > 0 && usuarioDireccion.Direccion.getIdDireccion() == 0){
+                
+                result = direccionJPADAOImplementation.DireccionAddJPA(usuarioDireccion);
+        
+                model.addAttribute("usuarioDireccion", usuarioJPADAOImplementation.UsuarioGetByIdJPA(usuarioDireccion.Usuario.getIdUsuario()).object);
+                return "UsuarioDatails";
             }
             
         return "redirect:/usuario";
@@ -265,13 +287,12 @@ public class UsuarioController {
                 if(condicional == 0 ){
                     condicional++;
                 }else{
-                    System.out.println(row.getCell(3));
                     UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
                     usuarioDireccion.Usuario = new Usuario();
                     usuarioDireccion.Usuario.setNombreUsuario(row.getCell(0) != null ? row.getCell(0).toString() : "");
                     usuarioDireccion.Usuario.setApellidoPaterno(row.getCell(1) != null ? row.getCell(1).toString() : "");
                     usuarioDireccion.Usuario.setApellidoMaterno(row.getCell(2) != null ? row.getCell(2).toString() : "");
-                     String fecha = row.getCell(3).toString();
+                    String fecha = row.getCell(3).toString();
                     SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
                     Date fechaconvertida = formato.parse(fecha);
                     usuarioDireccion.Usuario.setFechaNacimiento(fechaconvertida);
@@ -417,7 +438,7 @@ public class UsuarioController {
                 usuariosDireccion = LecturaArchivoExcel(archivo);
             }
             
-            usuarioDAOImplementation.InsercionMasiva(usuariosDireccion);
+            usuarioJPADAOImplementation.InsercionMasivaJPA(usuariosDireccion);
         }
         
         session.removeAttribute("path");
@@ -431,19 +452,19 @@ public class UsuarioController {
     @GetMapping("/EstadosByPais/{idPais}")
     @ResponseBody 
     public Result AllEstados(@PathVariable("idPais") int idPais){
-        return estadoDAOImplementation.GetAllEstados(idPais);
+        return estadoJPADAOImplementation.EstadoGetAllJPA(idPais);
     }
     
     @GetMapping("/MunicipiosByEstado/{idEstado}")
     @ResponseBody
     public Result AllMunicipios(@PathVariable("idEstado") int idEstado){
-        return municipioDAOImplementation.GetAllMunicipios(idEstado);
+        return municipioJPADAOImplementation.MunicipioGetAllJPA(idEstado);
     }
     
     @GetMapping("/ColoniasByMunicipio/{idMunicipio}")
     @ResponseBody
     public Result AllColonias(@PathVariable("idMunicipio") int idMunicipio){
-        return coloniaDAOImplementation.GetAllColonias(idMunicipio);
+        return coloniaJPADAOImplementation.ColoniaGetAllJPA(idMunicipio);
     }
     
     
@@ -461,7 +482,7 @@ public class UsuarioController {
             usuarioDireccion.Direccion = new Direccion();
             usuarioDireccion.Direccion.setIdDireccion(-1);
             model.addAttribute("usuarioDireccion", usuarioDireccion); //Se debe de colocar el IdUsuario para recuperar la información y mostrarla en el formulario
-            model.addAttribute("roles", rolDAOImplementation.GetAllRol().objects);
+            model.addAttribute("roles", rolJPADAOImplementation.RolGetAllJPA().objects);
         
         }else if(IdDireccion == 0){ // ----->> AGREGAR DIRECCION
             UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
@@ -470,24 +491,40 @@ public class UsuarioController {
             usuarioDireccion.Direccion = new Direccion();
             usuarioDireccion.Direccion.setIdDireccion(0);
             model.addAttribute("usuarioDireccion", usuarioDireccion);
-            model.addAttribute("paises", paisDAOImplementation.GetAllPais().objects);
+            Result result = paisJPADAOImplementation.PaisGetAllJPA();
+            model.addAttribute("paises", result.objects);    
             
         }else{  // ---->> EDITAR DIRECCION 
             UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
-            usuarioDireccion.Direccion = new Direccion();
-            usuarioDireccion.Direccion = (Direccion) direccionDAOImplementation.DireccionesAllSP(IdDireccion).object;
+            usuarioDireccion.Direccion = (Direccion) direccionJPADAOImplementation.DireccionByIdJPA(IdDireccion).object;
             usuarioDireccion.Usuario = new Usuario();
             usuarioDireccion.Usuario.setIdUsuario(IdUsuario);
             model.addAttribute("usuarioDireccion", usuarioDireccion);
             model.addAttribute("direccion", usuarioDireccion.Direccion);
+
             
             //Recuperar datos de las tablas de pais, estado, municipio y colonia.
-            model.addAttribute("paises", paisDAOImplementation.GetAllPais().objects);
-            model.addAttribute("estados", estadoDAOImplementation.GetAllEstados(usuarioDireccion.Direccion.Colonia.Municipio.Estado.Pais.getIdPais()).objects);
-            model.addAttribute("municipios", municipioDAOImplementation.GetAllMunicipios(usuarioDireccion.Direccion.Colonia.Municipio.Estado.getIdEstado()).objects);
-            model.addAttribute("colonia", coloniaDAOImplementation.GetAllColonias(usuarioDireccion.Direccion.Colonia.Municipio.getIdMunicipio()).objects);
+            model.addAttribute("paises", paisJPADAOImplementation.PaisGetAllJPA().objects);
+            model.addAttribute("estados", estadoJPADAOImplementation.EstadoGetAllJPA(usuarioDireccion.Direccion.Colonia.Municipio.Estado.Pais.getIdPais()).objects);
+            model.addAttribute("municipios", municipioJPADAOImplementation.MunicipioGetAllJPA(usuarioDireccion.Direccion.Colonia.Municipio.Estado.getIdEstado()).objects);
+            model.addAttribute("colonia", coloniaJPADAOImplementation.ColoniaGetAllJPA(usuarioDireccion.Direccion.Colonia.Municipio.getIdMunicipio()).objects);
         }
         return "Formulario";
     }
+//***************************************************************************************************************************    
+//***************************************************************************************************************************    
 
+    @GetMapping("/delete")
+    public String DeleteDireccion(@RequestParam int IdDireccion, Model model){
+        
+        Result result  = direccionJPADAOImplementation.DireccionDeleteJPA(IdDireccion);
+        
+        if(result.correct){
+            model.addAttribute("mensaje", "La direccion fue eliminada exitosamente.");
+        }else{
+            model.addAttribute("mensaje", "Error al eliminar la dirección.");
+        }
+        
+        return "redirect:/usuario/Formulario";
+    }   
 }

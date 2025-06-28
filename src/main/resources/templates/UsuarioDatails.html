@@ -82,7 +82,7 @@
                                 <td>
                                     <div class="d-flex gap-1">
                                         <button class="btn btn-danger">
-                                            <i class="bi bi-trash-fill"></i>
+                                            <a th:href="@{/usuario/delete?IdDireccion=}+${direccion.IdDireccion}"><i class="bi bi-trash-fill"></i></a>
                                         </button>
                                         <button class="btn btn-warning">
                                             <a th:href="@{/usuario/formeditable?IdUsuario=}+${usuarioDireccion.Usuario.IdUsuario}+'&IdDireccion='+${direccion.IdDireccion}"><i class="bi bi-pencil-square"></i></a>
@@ -96,11 +96,17 @@
             </div>
             <div class="row mt-4">
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button type="button" class="btn btn-success">
-                        <a>Nueva Direccion      <i class="bi bi-plus-square"></i></a>
-                    </button>
+                    <a th:href="@{/usuario/formeditable(IdUsuario=${usuarioDireccion.Usuario.IdUsuario}, IdDireccion=0)}" class="btn btn-success text-white text-decoration-none">
+                        NUEVA DIRECCION <i class="bi bi-plus-square"></i>
+                    </a>
                 </div>
             </div>
+            
+            <div th:if="${mensaje}" class="alert alert-dismissible fade show" role="alert">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
         </div>
     </body>
 </html>
